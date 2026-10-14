@@ -1,21 +1,24 @@
 package com.example.ecoreport.navigation
 
 import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
-import com.example.ecoreport.data.ReporteDao
 import com.example.ecoreport.data.ReporteEntity
+import com.example.ecoreport.repository.ReporteRepository
 import com.example.ecoreport.ui.screens.*
 import com.example.ecoreport.ui_comp.screens.PantallaInicio
+import com.example.ecoreport.viewmodel.ReporteViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun AppNavigation(
-    reporteDao: ReporteDao
+    repository: ReporteRepository
 ) {
 
     val navController =
         rememberNavController()
 
+    val viewModel: ReporteViewModel = viewModel()
     val reportes =
         remember {
             mutableStateListOf<
@@ -35,7 +38,7 @@ fun AppNavigation(
     suspend fun cargarReportes() {
 
         val datos =
-            reporteDao.obtenerTodos()
+            repository.obtenerTodos()
 
         reportes.clear()
 
@@ -64,7 +67,7 @@ fun AppNavigation(
 
             PantallaInicio (
                 reportes =
-                    reportes,
+                    viewModel.reportes,
 
                 irRegistro = {
                     navController
@@ -95,17 +98,10 @@ fun AppNavigation(
             PantallaRegistro(
                 registrarReporte = { reporte ->
 
-                    scope.launch {
+                    viewModel.insertar(reporte)
 
-                        reporteDao.insertar(
-                            reporte
-                        )
-
-                        cargarReportes()
-
-                        navController
-                            .popBackStack()
-                    }
+                    navController
+                        .popBackStack()
                 },
 
                 volver = {
@@ -121,7 +117,7 @@ fun AppNavigation(
 
             PantallaReportes(
                 reportes =
-                    reportes,
+                    viewModel.reportes,
 
                 seleccionarReporte = { reporte ->
 
@@ -150,20 +146,10 @@ fun AppNavigation(
 
                 eliminarReporte = { reporte ->
 
-                    scope.launch {
+                    viewModel.eliminar(reporte)
 
-                        reporteDao.eliminar(
-                            reporte
-                        )
-
-                        cargarReportes()
-
-                        reporteSeleccionado =
-                            null
-
-                        navController
-                            .popBackStack()
-                    }
+                    navController
+                        .popBackStack()
                 },
 
                 volver = {

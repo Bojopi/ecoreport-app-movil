@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.room.Room
 import com.example.ecoreport.data.AppDatabase
 import com.example.ecoreport.navigation.AppNavigation
+import com.example.ecoreport.repository.ReporteRepository
 
 class MainActivity :
     ComponentActivity() {
@@ -28,11 +29,14 @@ class MainActivity :
         val reporteDao =
             database.reporteDao()
 
+        val repository =
+            ReporteRepository(reporteDao)
+
         setContent {
 
             AppNavigation(
-                reporteDao =
-                    reporteDao
+                repository =
+                    repository
             )
         }
     }
