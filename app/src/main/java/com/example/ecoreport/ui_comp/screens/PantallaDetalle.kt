@@ -22,6 +22,7 @@ import com.example.ecoreport.data.ReporteEntity
 @Composable
 fun PantallaDetalle(
     reporte: ReporteEntity?,
+    actualizarReporte: (ReporteEntity) -> Unit,
     eliminarReporte: (ReporteEntity) -> Unit,
     volver: () -> Unit
 ) {
@@ -139,6 +140,26 @@ fun PantallaDetalle(
 
                     Spacer(
                         modifier = Modifier.height(24.dp)
+                    )
+
+                    Button(
+                        onClick = {
+                            val nuevoEstado = when (reporte.estado) {
+                                "PENDIENTE" -> "EN_PROCESO"
+                                "EN_PROCESO" -> "RESUELTO"
+                                else -> "RESUELTO"
+                            }
+
+                            val reporteActualizado = reporte.copy(estado = nuevoEstado)
+
+                            actualizarReporte(reporteActualizado)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = "CAMBIAR ESTADO")
+                    }
+                    Spacer(
+                        modifier = Modifier.height(10.dp)
                     )
 
                     Button(

@@ -39,4 +39,12 @@ class ReporteViewModel (
             cargarReportes()
         }
     }
+
+    fun actualizar(reporte: ReporteEntity) {
+        viewModelScope.launch {
+            repository.actualizar(reporte)
+
+            cargarReportes()
+        }
+    }
 }
