@@ -1,14 +1,24 @@
 package com.example.ecoreport.navigation
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.ecoreport.data.ReporteEntity
 import com.example.ecoreport.repository.ReporteRepository
-import com.example.ecoreport.ui.screens.*
+import com.example.ecoreport.ui_comp.screens.PantallaDetalle
+import com.example.ecoreport.ui_comp.screens.PantallaEstadisticas
+import com.example.ecoreport.ui_comp.screens.PantallaRegistro
+import com.example.ecoreport.ui_comp.screens.PantallaReportes
 import com.example.ecoreport.ui_comp.screens.PantallaInicio
 import com.example.ecoreport.viewmodel.ReporteViewModel
-import kotlinx.coroutines.launch
+import com.example.ecoreport.viewmodel.ReporteViewModelFactory
 
 @Composable
 fun AppNavigation(
@@ -18,87 +28,73 @@ fun AppNavigation(
     val navController =
         rememberNavController()
 
-    val viewModel: ReporteViewModel = viewModel()
-    val reportes =
-        remember {
-            mutableStateListOf<
-                    ReporteEntity
-                    >()
+    val factory =
+        remember(repository) {
+
+            ReporteViewModelFactory(
+                repository
+            )
         }
 
-    var reporteSeleccionado by remember {
-        mutableStateOf<
-                ReporteEntity?
-                >(null)
-    }
-
-    val scope =
-        rememberCoroutineScope()
-
-    suspend fun cargarReportes() {
-
-        val datos =
-            repository.obtenerTodos()
-
-        reportes.clear()
-
-        reportes.addAll(
-            datos
+    val viewModel:
+            ReporteViewModel =
+        viewModel(
+            factory = factory
         )
+
+    val reportes by viewModel.reportes
+        .collectAsStateWithLifecycle()
+
+    var reporteSeleccionado by remember {
+        mutableStateOf<ReporteEntity?>(null)
     }
 
-    LaunchedEffect(Unit) {
-
-        cargarReportes()
-
-    }
+    val categoriaSeleccionada by viewModel
+        .categoriaSeleccionada
+        .collectAsStateWithLifecycle()
 
     NavHost(
-        navController =
-            navController,
-
-        startDestination =
-            "inicio"
+        navController = navController,
+        startDestination = "inicio"
     ) {
 
-        composable(
-            "inicio"
-        ) {
+        composable("inicio") {
 
-            PantallaInicio (
-                reportes =
-                    viewModel.reportes,
+            PantallaInicio(
+                reportes = reportes,
 
                 irRegistro = {
-                    navController
-                        .navigate(
-                            "registro"
-                        )
+
+                    navController.navigate(
+                        "registro"
+                    )
                 },
 
                 irReportes = {
-                    navController
-                        .navigate(
-                            "reportes"
-                        )
+
+                    navController.navigate(
+                        "reportes"
+                    )
                 },
 
                 irEstadisticas = {
-                    navController
-                        .navigate(
-                            "estadisticas"
-                        )
+
+                    navController.navigate(
+                        "estadisticas"
+                    )
                 }
             )
         }
-        composable(
-            "registro"
-        ) {
+
+        composable("registro") {
 
             PantallaRegistro(
-                registrarReporte = { reporte ->
+                registrarReporte = {
+                        reporte ->
 
-                    viewModel.insertar(reporte)
+                    viewModel.insertar(
+                        reporte
+                    )
 
                     navController
                         .popBackStack()
@@ -111,15 +107,21 @@ fun AppNavigation(
                 }
             )
         }
-        composable(
-            "reportes"
-        ) {
+
+        composable("reportes") {
 
             PantallaReportes(
-                reportes =
-                    viewModel.reportes,
+                reportes = reportes,
 
-                seleccionarReporte = { reporte ->
+                categoriaSeleccionada = categoriaSeleccionada,
+
+                seleccionarCategoria = {
+                    categoria ->
+                    viewModel.seleccionarCategoria(categoria)
+                },
+
+                seleccionarReporte = {
+                        reporte ->
 
                     reporteSeleccionado =
                         reporte
@@ -136,41 +138,50 @@ fun AppNavigation(
                 }
             )
         }
-        composable(
-            "detalle"
-        ) {
+
+        composable("detalle") {
 
             PantallaDetalle(
                 reporte =
                     reporteSeleccionado,
 
                 actualizarReporte = {
-                    reporteActualizado ->
-                    viewModel.actualizar(reporteActualizado)
-                    reporteSeleccionado = reporteActualizado
+                        reporteActualizado ->
+
+                    viewModel.actualizar(
+                        reporteActualizado
+                    )
+
+                    reporteSeleccionado =
+                        reporteActualizado
                 },
 
-                eliminarReporte = { reporte ->
+                eliminarReporte = {
+                        reporte ->
 
-                    viewModel.eliminar(reporte)
+                    viewModel.eliminar(
+                        reporte
+                    )
+
+                    reporteSeleccionado =
+                        null
 
                     navController
                         .popBackStack()
                 },
 
                 volver = {
+
                     navController
                         .popBackStack()
                 }
             )
         }
-        composable(
-            "estadisticas"
-        ) {
+
+        composable("estadisticas") {
 
             PantallaEstadisticas(
-                reportes =
-                    reportes,
+                reportes = reportes,
 
                 volver = {
 

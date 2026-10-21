@@ -1,4 +1,4 @@
-package com.example.ecoreport.ui.screens
+package com.example.ecoreport.ui_comp.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

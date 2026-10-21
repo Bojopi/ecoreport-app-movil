@@ -1,4 +1,4 @@
-package com.example.ecoreport.ui.screens
+package com.example.ecoreport.ui_comp.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +25,8 @@ import com.example.ecoreport.data.ReporteEntity
 @Composable
 fun PantallaReportes(
     reportes: List<ReporteEntity>,
+    categoriaSeleccionada: String?,
+    seleccionarCategoria: (ReporteEntity) -> Unit,
     seleccionarReporte: (ReporteEntity) -> Unit,
     volver: () -> Unit
 ) {
