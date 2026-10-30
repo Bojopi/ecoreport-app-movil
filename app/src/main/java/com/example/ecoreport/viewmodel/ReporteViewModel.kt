@@ -20,13 +20,6 @@ class ReporteViewModel (
 
     private val _categoriaSeleccionada = MutableStateFlow<String?>(null)
 
-    private val _reportesRemotos = MutableStateFlow<List<ReporteDto>>(emptyList())
-    private val _cargando = MutableStateFlow(false)
-    val cargando: StateFlow<Boolean> = _cargando
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
-
     val categoriaSeleccionada: StateFlow<String?> = _categoriaSeleccionada
     val reportes:
     StateFlow<List<ReporteEntity>> =
@@ -64,5 +57,32 @@ class ReporteViewModel (
 
     fun seleccionarCategoria(categoria: String?) {
         _categoriaSeleccionada.value = categoria
+    }
+
+    //DATOS REMOTOS
+    private val _reportesRemotos = MutableStateFlow<List<ReporteDto>>(emptyList())
+    val reportesRemotos: StateFlow<List<ReporteDto>> = _reportesRemotos
+    private val _cargando = MutableStateFlow(false)
+    val cargando: StateFlow<Boolean> = _cargando
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    fun cargarReportesRemotos() {
+        viewModelScope.launch {
+            _cargando.value = true
+            _error.value = null
+
+            try {
+                val datos = repository.obtenerReportesRemotos()
+
+                _reportesRemotos.value = datos
+            } catch (
+                e: Exception
+            ) {
+                _error.value = "No se pudieron cargar los reportes"
+            } finally {
+                _cargando.value = false
+            }
+        }
     }
 }

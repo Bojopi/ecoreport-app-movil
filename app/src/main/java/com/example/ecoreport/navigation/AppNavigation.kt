@@ -1,6 +1,7 @@
 package com.example.ecoreport.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -12,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.ecoreport.data.ReporteEntity
 import com.example.ecoreport.repository.ReporteRepository
+import com.example.ecoreport.ui.screens.PantallaReportesRemotos
 import com.example.ecoreport.ui_comp.screens.PantallaDetalle
 import com.example.ecoreport.ui_comp.screens.PantallaEstadisticas
 import com.example.ecoreport.ui_comp.screens.PantallaRegistro
@@ -53,6 +55,21 @@ fun AppNavigation(
         .categoriaSeleccionada
         .collectAsStateWithLifecycle()
 
+    val reportesRemotos by
+    viewModel
+        .reportesRemotos
+        .collectAsStateWithLifecycle()
+
+    val cargando by
+    viewModel
+        .cargando
+        .collectAsStateWithLifecycle()
+
+    val error by
+    viewModel
+        .error
+        .collectAsStateWithLifecycle()
+
     NavHost(
         navController = navController,
         startDestination = "inicio"
@@ -81,6 +98,13 @@ fun AppNavigation(
 
                     navController.navigate(
                         "estadisticas"
+                    )
+                },
+
+                irReportesRemotos = {
+
+                    navController.navigate(
+                        "reportes_remotos"
                     )
                 }
             )
@@ -182,6 +206,37 @@ fun AppNavigation(
 
             PantallaEstadisticas(
                 reportes = reportes,
+
+                volver = {
+
+                    navController
+                        .popBackStack()
+                }
+            )
+        }
+
+        composable(
+            "reportes_remotos"
+        ) {
+
+            LaunchedEffect(
+                Unit
+            ) {
+
+                viewModel
+                    .cargarReportesRemotos()
+            }
+
+            PantallaReportesRemotos(
+
+                reportes =
+                    reportesRemotos,
+
+                cargando =
+                    cargando,
+
+                error =
+                    error,
 
                 volver = {
 
