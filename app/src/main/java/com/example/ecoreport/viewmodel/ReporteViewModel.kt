@@ -1,6 +1,5 @@
 package com.example.ecoreport.viewmodel
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecoreport.data.ReporteEntity
@@ -13,6 +12,14 @@ import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+
+sealed interface EstadoReportesRemotos {
+    data object Cargando : EstadoReportesRemotos
+    data class Exito(val reportes: List<ReporteDto>) : EstadoReportesRemotos
+    data object Error : EstadoReportesRemotos
+}
 
 class ReporteViewModel (
     private val repository: ReporteRepository
@@ -20,12 +27,23 @@ class ReporteViewModel (
 
     private val _categoriaSeleccionada = MutableStateFlow<String?>(null)
 
-    private val _reportesRemotos = MutableStateFlow<List<ReporteDto>>(emptyList())
-    private val _cargando = MutableStateFlow(false)
-    val cargando: StateFlow<Boolean> = _cargando
+    private val _estadoReportesRemotos = MutableStateFlow<EstadoReportesRemotos>(EstadoReportesRemotos.Cargando)
+    val estadoReportesRemotos: StateFlow<EstadoReportesRemotos> = _estadoReportesRemotos
+    private var consultaRemota: Job? = null
 
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
+    fun cargarReportesRemotos() {
+        consultaRemota?.cancel()
+        consultaRemota = viewModelScope.launch {
+            _estadoReportesRemotos.value = EstadoReportesRemotos.Cargando
+            try {
+                _estadoReportesRemotos.value = EstadoReportesRemotos.Exito(repository.obtenerReportesRemotos())
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _estadoReportesRemotos.value = EstadoReportesRemotos.Error
+            }
+        }
+    }
 
     val categoriaSeleccionada: StateFlow<String?> = _categoriaSeleccionada
     val reportes:

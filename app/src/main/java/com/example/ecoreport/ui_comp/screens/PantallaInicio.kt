@@ -25,6 +25,8 @@ fun PantallaInicio(
     irReportes:
         () -> Unit,
 
+    irReportesRemotos: () -> Unit,
+
     irEstadisticas:
         () -> Unit
 ) {
@@ -114,6 +116,13 @@ fun PantallaInicio(
             Text(
                 "VER REPORTES"
             )
+        }
+
+        Button(
+            onClick = irReportesRemotos,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("REPORTES REMOTOS")
         }
 
         Button(

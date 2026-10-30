@@ -4,7 +4,7 @@ import retrofit2.http.GET
 
 interface ReporteApiService {
 
-    @GET("reportes")//BASE_URL = http://api.ejemplo.com/reportes
+    @GET("reportes")
     suspend fun obtenerReportes():
             List<ReporteDto>
 }
