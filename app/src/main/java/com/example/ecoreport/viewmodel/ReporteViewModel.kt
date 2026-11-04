@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecoreport.data.ReporteEntity
+import com.example.ecoreport.data.remote.CrearReporteDto
 import com.example.ecoreport.data.remote.ReporteDto
 import com.example.ecoreport.repository.ReporteRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,4 +86,39 @@ class ReporteViewModel (
             }
         }
     }
+
+    fun crearNuevoReporteRemoto(
+        titulo: String,
+        descripcion: String,
+        categoria: String,
+        ubicacion: String,
+        estado: String,
+        fecha: String
+    ) {
+        viewModelScope.launch {
+            _cargando.value = true
+
+            _error.value = null
+
+            try {
+                val reporte = CrearReporteDto(
+                    titulo,
+                    descripcion,
+                    categoria,
+                    ubicacion,
+                    estado = "PENDIENTE",
+                    fecha
+                )
+
+                repository.crearReporte(reporte)
+                cargarReportesRemotos()
+            } catch (e: Exception) {
+                _error.value = "Hubo un error al momento de crear el registro, por favor comuniquese con soporte"
+            } finally {
+                _cargando.value = false
+            }
+        }
+    }
+
+
 }
